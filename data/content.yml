@@ -38,17 +38,23 @@ experience:
     - name: Linux Kernel Developer & Co-founder
       company: JarvisOS Linux
       duration: 'Jun 2018 – Present'
-      content: Co-founded JarvisOS, a custom Linux distribution with a kernel submodule tracking upstream Linux. Contributed kernel patches, led a 5-person development team, and helped the EndeavourOS project reach 4,000+ users. 18+ commits across the JarvisOS Linux kernel repository.
+      content: Co-founded JarvisOS, a custom Linux distribution with a kernel submodule tracking upstream Linux. Contributed kernel patches and led a 5-person development team. 18+ commits across the JarvisOS Linux kernel repository.
 
     - name: Security Operations & Systems Administrator
       company: WSU CyberSecurity Lab
       duration: 'Jan 2024 – May 2025'
       content: Managed security infrastructure for 1,000+ users. As President of WSU CyberClub, grew membership from 5 to 20+ members and led 20+ technical workshops bridging security concepts for non-technical audiences.
 
+    - name: Jack of All Tech Trades
+      company: The Internet, Various Rabbit Holes & Dark Corners of Stack Overflow
+      duration: 'Birth – Present'
+      content: Kernel hacking, malware reversing, ML pipelines, web dev, game jams, embedded systems, CTFs, sysadmin firefighting — if it has a terminal or a debugger, it's fair game. Specialist in becoming dangerous with any tool in under 48 hours.
+
     - name: Technology Specialist
       company: Tech Security USA
       duration: 'Jan 2024 – Present'
       content: Provide technical support and security consulting, implementing security solutions and access control systems for enterprise clients.
+      enable: false
 
     - name: PC Support Helpdesk Intern
       company: Expeditors International
