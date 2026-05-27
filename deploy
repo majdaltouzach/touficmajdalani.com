@@ -33,14 +33,14 @@ rsync -arzvh "$PWD/public/" --delete "${VPS_USER}@${VPS_HOST}:${VPS_DIR}"
 
 # ── Deploy contact handler ─────────────────────────────────────────────────────
 echo "Deploying contact handler..."
-ssh "${VPS_USER}@${VPS_HOST}" "mkdir -p /opt/contact-handler"
+ssh "${VPS_USER}@${VPS_HOST}" "mkdir -p ~/contact-handler"
 rsync -arzvh "$PWD/server/contact_handler.py" \
              "$PWD/server/contact-handler.service" \
-             "${VPS_USER}@${VPS_HOST}:/opt/contact-handler/"
+             "${VPS_USER}@${VPS_HOST}:~/contact-handler/"
 
 # Install systemd service if not already present, then reload
 ssh "${VPS_USER}@${VPS_HOST}" bash <<'REMOTE'
-  SERVICE_SRC="/opt/contact-handler/contact-handler.service"
+  SERVICE_SRC="$HOME/contact-handler/contact-handler.service"
   SERVICE_DST="/etc/systemd/system/contact-handler.service"
 
   # Copy service file if it changed or doesn't exist

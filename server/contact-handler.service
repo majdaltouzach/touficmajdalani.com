@@ -6,8 +6,8 @@ Wants=network.target
 [Service]
 Type=simple
 User=toufic
-WorkingDirectory=/opt/contact-handler
-ExecStart=/usr/bin/python3 /opt/contact-handler/contact_handler.py
+WorkingDirectory=/home/toufic/contact-handler
+ExecStart=/usr/bin/python3 /home/toufic/contact-handler/contact_handler.py
 EnvironmentFile=/etc/contact-handler.env
 Restart=on-failure
 RestartSec=5
@@ -20,7 +20,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/opt/contact-handler
+ReadWritePaths=/home/toufic/contact-handler
 
 [Install]
 WantedBy=multi-user.target
