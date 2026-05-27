@@ -18,11 +18,11 @@ about:
   enable: true
   image: 'images/profile.png'
   title: 'THIS IS ME'
-  content: Hi, thank you for taking a look around my site. I'm a Software Engineering graduate from Washington State University with a passion for systems development, cybersecurity, and open-source contributions. If you have any questions feel free to reach out on [LinkedIn, Github, or by email](#contact)!
+  content: Hi, thank you for taking a look around my site. I'm a Software Engineering graduate from Washington State University with a passion for systems development, cybersecurity, and open-source contributions. I hold a CompTIA Security+ certification and co-founded the JarvisOS Linux project. If you have any questions feel free to reach out on [LinkedIn, Github, or by email](#contact)!
   button:
     enable: true
     label: 'DOWNLOAD MY RESUME'
-    link: 'resume/Toufic-Majdalani_Resume_2025-2026.pdf' 
+    link: 'resume/Toufic-Majdalani_Resume_2025-2026.pdf'
     icon: 'fa-download'
 
 ###########################3 Experience ##############################
@@ -30,25 +30,37 @@ experience:
   enable: true
   title: 'EXPERIENCE'
   experience_list:
-    - name: Open-Source Software Developer
-      company: Linux Kernel & System-Level Projects
-      duration: 'Jun 2017 - Present'
-      content: Contribute to Linux Kernel in C focusing on security-critical components, memory management, and system hardening.
+    - name: Security Software Engineer
+      company: "🔒 [CLASSIFIED] — Need-to-Know Only"
+      duration: 'Whenever They Need Me — Present'
+      content: Developing advanced security tooling and binary analysis infrastructure for a highly sensitive project we legally cannot name. Malware doesn't stand a chance. Details are on a need-to-know basis — and you don't need to know. 🤫
+
+    - name: Linux Kernel Developer & Co-founder
+      company: JarvisOS Linux
+      duration: 'Jun 2018 – Present'
+      content: Co-founded JarvisOS, a custom Linux distribution with a kernel submodule tracking upstream Linux. Contributed kernel patches, led a 5-person development team, and helped the EndeavourOS project reach 4,000+ users. 18+ commits across the JarvisOS Linux kernel repository.
+
+    - name: Security Operations & Systems Administrator
+      company: WSU CyberSecurity Lab
+      duration: 'Jan 2024 – May 2025'
+      content: Managed security infrastructure for 1,000+ users. As President of WSU CyberClub, grew membership from 5 to 20+ members and led 20+ technical workshops bridging security concepts for non-technical audiences.
 
     - name: Technology Specialist
       company: Tech Security USA
-      duration: 'Jan 2024 - Present'
+      duration: 'Jan 2024 – Present'
       content: Provide technical support and security consulting, implementing security solutions and access control systems for enterprise clients.
 
     - name: PC Support Helpdesk Intern
       company: Expeditors International
-      duration: 'Jun 2023 - Aug 2023'
+      duration: 'Jun 2023 – Aug 2023'
       content: Debugged enterprise Windows systems and automated IT workflows using PowerShell and Python.
+      enable: false
 
     - name: QA Tester I Intern
       company: Denali Advanced Integration (T-Mobile)
-      duration: 'Jul 2019 - Sept 2019'
+      duration: 'Jul 2019 – Sept 2019'
       content: Performed testing and validation of enterprise applications ensuring quality and regulatory compliance.
+      enable: false
 
 ############################### Skill #################################
 skill:
@@ -56,37 +68,37 @@ skill:
   title: 'TECHNICAL SKILLS'
   showpercent: false
   skill_list:
-    - name: 'C/C++ Systems Programming'
+    - name: 'C/C++ Systems & Kernel Programming'
       percentage: '95%'
+
+    - name: 'Python, Bash & Scripting'
+      percentage: '90%'
+
+    - name: 'ML Pipelines (PyTorch, TensorFlow, scikit-learn)'
+      percentage: '85%'
 
     - name: 'Linux/Windows Administration'
       percentage: '90%'
 
-    - name: 'Python & Bash Scripting'
+    - name: 'Cybersecurity & Threat Analysis'
       percentage: '90%'
 
     - name: 'Docker & Containerization'
       percentage: '85%'
 
-    - name: 'Cybersecurity & Threat Analysis'
-      percentage: '85%'
-
-    - name: 'Cloud Infrastructure (AWS/Azure)'
+    - name: 'Cloud Infrastructure (AWS/GCP)'
       percentage: '80%'
 
-    - name: 'Database Systems (SQL/MongoDB)'
+    - name: 'Database Systems (SQL/MongoDB/Snowflake)'
       percentage: '85%'
-
-    - name: 'Git & CI/CD Pipelines'
-      percentage: '90%'
 
 ######################### funfacts #############################3
 funfacts:
   enable: true
   funfacts_list:
-    - name: 'COFFEE CUPS PER DAY'
+    - name: 'TURKISH COFFEES PER DAY (MINIMUM)'
       image: 'images/icons/coffee.png'
-      count: '4'
+      count: '6'
 
     - name: 'OPEN-SOURCE CONTRIBUTIONS'
       image: 'images/icons/web-development.png'
@@ -98,7 +110,7 @@ funfacts:
 
 ############################# portfolio ################################
 # Portfolio section disabled - small icons don't work well with .Fill template method
-# To enable: create static/images/portfolio/ with proper-sized project screenshots (at least 800x600px)
+# To enable: create assets/images/portfolio/ with proper-sized project screenshots (780x500 large, 395x250 thumb)
 portfolio:
   enable: false
   title: 'PROJECTS & RESEARCH'
@@ -106,14 +118,14 @@ portfolio:
     - name: YouTube Big Data Analytics Platform
       image: 'images/portfolio/bigdata.png'
       url: https://github.com/majdaltouzach
-      description: Built distributed data processing system using Apache Spark and MongoDB handling 100K+ items with 99.9% data integrity. Implemented real-time analytics pipeline with automated ETL processes for YouTube metadata analysis.
+      description: Built distributed analytics pipeline in Python and Apache Spark processing 100,000+ records at 40K–55K rec/sec with 99.9% data integrity. Implemented KMeans clustering and graph analytics with end-to-end model validation and performance tracking.
 
-    - name: WSU CyberSecurity Lab
-      image: 'images/portfolio/cybersec.png'
+    - name: ML Classification & Automated Data Pipeline
+      image: 'images/portfolio/mlpipeline.png'
       url: https://github.com/majdaltouzach
-      description: Developed security monitoring tools in C/Python using Splunk SIEM. Led incident response and security assessments for university infrastructure, implementing automated threat detection systems.
+      description: Developed supervised ML classification system with automated data wrangling pipelines and production monitoring. Owned full model lifecycle from data ingestion through algorithm development, deployment, and performance tuning.
 
-    - name: Malware Binary Analysis Toolkit
-      image: 'images/portfolio/malware.png'
-      url: https://github.com/majdaltouzach
-      description: Built containerized malware analysis environment using Docker and Python for safe binary examination. Created automated static and dynamic analysis pipelines with Ghidra integration for reverse engineering workflows.
+    - name: JarvisOS Linux
+      image: 'images/portfolio/jarvisos.png'
+      url: https://github.com/JarvisOSLinux/linux-jarvisos
+      description: Co-founded JarvisOS Linux — a custom Linux distribution with kernel submodule patches focused on security and performance. 18+ kernel commits, 5-person team, building on top of the EndeavourOS foundation that reached 4,000+ users.
