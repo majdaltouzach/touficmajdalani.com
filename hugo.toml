@@ -35,12 +35,12 @@ link = "plugins/hugrid/hugrid.min.js"
 # main menu
 [[menu.main]]
 name = "Home"
-URL = "#home"
+URL = "/#home"
 weight = 1
 
 [[menu.main]]
 name = "About me"
-URL = "#about"
+URL = "/#about"
 weight = 2
 
  # [[menu.main]]
