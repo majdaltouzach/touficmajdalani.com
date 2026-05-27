@@ -1,0 +1,221 @@
+{{ define "main" }}
+{{- partial "menu.html" . -}}
+
+<section class="contact-hero" id="contact-hero">
+  <div class="hero-image">
+    <img class="d-none d-md-block" src="{{ "images/background.jpg" | relURL }}" alt="background" />
+    <img class="d-md-none" src="{{ "images/lebanon_small.jpg" | relURL }}" alt="background" />
+  </div>
+  <div class="container">
+    <div class="row content">
+      <div class="col-lg-8 col-lg-offset-2 col-sm-8 col-sm-offset-2 head-container">
+        <div class="head-holder">
+          <h1 class="introduction">Get In Touch</h1>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact-form-section">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-7 col-md-9 col-sm-11">
+
+        <div id="form-alert" class="contact-alert" style="display:none"></div>
+
+        <form id="contact-form" novalidate>
+          <div class="form-row">
+            <div class="form-group col-sm-6">
+              <label for="first_name">First Name</label>
+              <input type="text" id="first_name" name="first_name"
+                     class="form-control contact-input"
+                     placeholder="Toufic" required />
+            </div>
+            <div class="form-group col-sm-6">
+              <label for="last_name">Last Name</label>
+              <input type="text" id="last_name" name="last_name"
+                     class="form-control contact-input"
+                     placeholder="Majdalani" required />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input type="email" id="email" name="email"
+                   class="form-control contact-input"
+                   placeholder="you@example.com" required />
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message"
+                      class="form-control contact-input"
+                      rows="6"
+                      placeholder="What's on your mind?" required></textarea>
+          </div>
+
+          <button type="submit" id="submit-btn" class="button contact-submit">
+            Send Message <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>
+
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.contact-hero {
+  position: relative;
+  min-height: 40vh;
+  display: flex;
+  align-items: center;
+  background: #2b2c2f;
+}
+.contact-hero .hero-image {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+.contact-hero .hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.45;
+}
+.contact-hero .container {
+  position: relative;
+  z-index: 1;
+}
+.contact-hero .introduction {
+  color: #fff;
+  font-size: 2.8rem;
+  font-weight: 700;
+  text-align: center;
+}
+.contact-form-section {
+  background: #fff;
+  padding: 72px 0 80px;
+}
+.contact-form-section label {
+  color: #6f6f6f;
+  font-weight: 500;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.contact-input {
+  background: #f7f7f7;
+  border: 1px solid #e0e0e0;
+  border-radius: 3px;
+  color: #4d4d4d;
+  font-family: 'Rubik', sans-serif;
+  font-size: 0.95rem;
+  padding: 12px 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.contact-input:focus {
+  border-color: #6f6f6f;
+  box-shadow: 0 0 0 3px rgba(111,111,111,0.12);
+  outline: none;
+  background: #fff;
+}
+textarea.contact-input {
+  resize: vertical;
+  min-height: 140px;
+}
+.contact-submit {
+  margin-top: 8px;
+  padding: 14px 36px;
+  font-size: 0.9rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border: none;
+  cursor: pointer;
+}
+.contact-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.contact-alert {
+  padding: 14px 18px;
+  border-radius: 3px;
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+}
+.contact-alert.success {
+  background: #eaf7f0;
+  border: 1px solid #b2dfcc;
+  color: #276749;
+}
+.contact-alert.error {
+  background: #fdf0f0;
+  border: 1px solid #f5c6c6;
+  color: #7b2020;
+}
+</style>
+
+<script>
+(function () {
+  var form    = document.getElementById('contact-form');
+  var btn     = document.getElementById('submit-btn');
+  var alert   = document.getElementById('form-alert');
+
+  function showAlert(msg, type) {
+    alert.textContent = msg;
+    alert.className   = 'contact-alert ' + type;
+    alert.style.display = 'block';
+    alert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    var first   = document.getElementById('first_name').value.trim();
+    var last    = document.getElementById('last_name').value.trim();
+    var email   = document.getElementById('email').value.trim();
+    var message = document.getElementById('message').value.trim();
+
+    if (!first || !last || !email || !message) {
+      showAlert('Please fill in all fields.', 'error');
+      return;
+    }
+
+    btn.disabled    = true;
+    btn.textContent = 'Sending…';
+
+    fetch('/contact-submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        first_name: first,
+        last_name:  last,
+        email:      email,
+        message:    message
+      })
+    })
+    .then(function (res) { return res.json(); })
+    .then(function (data) {
+      if (data.ok) {
+        showAlert(data.message, 'success');
+        form.reset();
+      } else {
+        showAlert(data.error || 'Something went wrong. Please try again.', 'error');
+      }
+    })
+    .catch(function () {
+      showAlert('Network error. Please check your connection and try again.', 'error');
+    })
+    .finally(function () {
+      btn.disabled    = false;
+      btn.innerHTML   = 'Send Message <i class="fas fa-paper-plane"></i>';
+    });
+  });
+})();
+</script>
+
+{{- partial "footer.html" . -}}
+{{ end }}

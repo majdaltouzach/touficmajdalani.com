@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Load environment variables from .env file
 if [ -f .env ]; then
@@ -22,24 +23,41 @@ if [ -z "$VPS_USER" ] || [ -z "$VPS_HOST" ] || [ -z "$VPS_DIR" ]; then
     exit 1
 fi
 
-# Build the Hugo site
+# ── Build Hugo site ────────────────────────────────────────────────────────────
 echo "Building Hugo site..."
 hugo
 
-# Check if build was successful
-if [ $? -ne 0 ]; then
-    echo "Error: Hugo build failed!"
-    exit 1
-fi
-
-# Deploy to VPS
-echo "Deploying to ${VPS_USER}@${VPS_HOST}:${VPS_DIR}"
+# ── Deploy static files ────────────────────────────────────────────────────────
+echo "Deploying static site to ${VPS_USER}@${VPS_HOST}:${VPS_DIR}"
 rsync -arzvh "$PWD/public/" --delete "${VPS_USER}@${VPS_HOST}:${VPS_DIR}"
 
-# Check if deployment was successful
-if [ $? -eq 0 ]; then
-    echo "Deployment successful!"
-else
-    echo "Error: Deployment failed!"
-    exit 1
-fi
+# ── Deploy contact handler ─────────────────────────────────────────────────────
+echo "Deploying contact handler..."
+ssh "${VPS_USER}@${VPS_HOST}" "mkdir -p /opt/contact-handler"
+rsync -arzvh "$PWD/server/contact_handler.py" \
+             "$PWD/server/contact-handler.service" \
+             "${VPS_USER}@${VPS_HOST}:/opt/contact-handler/"
+
+# Install systemd service if not already present, then reload
+ssh "${VPS_USER}@${VPS_HOST}" bash <<'REMOTE'
+  SERVICE_SRC="/opt/contact-handler/contact-handler.service"
+  SERVICE_DST="/etc/systemd/system/contact-handler.service"
+
+  # Copy service file if it changed or doesn't exist
+  if [ ! -f "$SERVICE_DST" ] || ! diff -q "$SERVICE_SRC" "$SERVICE_DST" > /dev/null 2>&1; then
+    sudo cp "$SERVICE_SRC" "$SERVICE_DST"
+    sudo systemctl daemon-reload
+    sudo systemctl enable contact-handler
+  fi
+
+  if [ ! -f /etc/contact-handler.env ]; then
+    echo "⚠️  WARNING: /etc/contact-handler.env not found on VPS."
+    echo "   Create it from server/contact-handler.env.example before the handler can start."
+    echo "   Contact form submissions will fail until this is done."
+  else
+    sudo systemctl restart contact-handler
+    echo "Contact handler status: $(sudo systemctl is-active contact-handler)"
+  fi
+REMOTE
+
+echo "Deployment successful!"

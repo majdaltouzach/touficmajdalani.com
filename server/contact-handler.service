@@ -1,0 +1,26 @@
+[Unit]
+Description=Contact form handler for touficmajdalani.com
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=toufic
+WorkingDirectory=/opt/contact-handler
+ExecStart=/usr/bin/python3 /opt/contact-handler/contact_handler.py
+EnvironmentFile=/etc/contact-handler.env
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=contact-handler
+
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/contact-handler
+
+[Install]
+WantedBy=multi-user.target
