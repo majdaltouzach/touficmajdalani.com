@@ -22,7 +22,7 @@ yarn prettier
 
 Hugo static site using the `port-hugo` theme (vendored in `themes/port-hugo/` as a git subtree).
 
-**All content lives in one file:** `data/content.yml`. Sections (hero, about, experience, skill, funfacts, portfolio) are toggled via `enable: true/false` in that file. No Markdown content pages exist — this is a single-page portfolio.
+**All content lives in one file:** `data/content.yml`. Sections (hero, about, experience, skill, funfacts, portfolio) are toggled via `enable: true/false` in that file. The main site is a single-page portfolio; the only separate page is `/contact/` (see below).
 
 **Layout override pattern:** `layouts/` overrides theme defaults. Custom partials in `layouts/partials/` take precedence over `themes/port-hugo/layouts/partials/`. The main page template is `layouts/index.html`.
 
@@ -42,6 +42,22 @@ Hugo static site using the `port-hugo` theme (vendored in `themes/port-hugo/` as
 | `static/resume/` | PDF resume served directly |
 | `assets/images/` | Images processed by Hugo pipelines (use for portfolio) |
 | `static/images/` | Images served as-is (use for bg, profile, icons) |
+| `content/contact.md` | Minimal front-matter stub that activates the contact page |
+| `server/` | VPS contact-form backend (Python, systemd service, env example) |
+
+## Contact form infrastructure
+
+`/contact/` is a real Hugo page (`content/contact.md`, type `contact`) rendered by `layouts/contact/single.html`. The form POSTs JSON to `/contact-submit`, which nginx must proxy to the VPS backend at `127.0.0.1:5001`.
+
+**Backend:** `server/contact_handler.py` — Python stdlib HTTP server, no deps. Handles `POST /contact-submit`, rate-limits (5/IP/hour), sends ProtonMail SMTP emails to both submitter and owner.
+
+**VPS setup:**
+- Copy `server/contact_handler.py` → `/home/toufic/contact-handler/`
+- Copy `server/contact-handler.service` → `/etc/systemd/system/` and `systemctl enable --now contact-handler`
+- Create `/etc/contact-handler.env` from `server/contact-handler.env.example` (never commit real file)
+- nginx: `proxy_pass http://127.0.0.1:5001;` for `location /contact-submit`
+
+**Nav split:** Home/About links use `/#home` / `/#about` (anchors on the homepage); Contact uses `/contact/` (separate page). This is intentional — keep consistent when adding menu items.
 
 ## Gotchas
 

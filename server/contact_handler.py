@@ -5,9 +5,11 @@ Listens on 127.0.0.1:LISTEN_PORT, handles POST /contact-submit
 Sends confirmation email to user + copy to site owner via ProtonMail SMTP
 """
 
+import html as _html
 import json
 import logging
 import os
+import re
 import smtplib
 import time
 from collections import defaultdict
@@ -26,18 +28,57 @@ LISTEN_HOST = os.environ.get("LISTEN_HOST", "127.0.0.1")
 LISTEN_PORT = int(os.environ.get("LISTEN_PORT", "5001"))
 SITE_ORIGIN = os.environ.get("SITE_ORIGIN", "https://touficmajdalani.com")
 
-# ── Rate limiting: max 5 submissions per IP per hour ──────────────────────────
-_rate: dict = defaultdict(list)
-RATE_LIMIT  = 5
-RATE_WINDOW = 3600  # seconds
+# ── Request size cap ──────────────────────────────────────────────────────────
+MAX_BODY = 10_240  # 10 KB
+
+# ── Rate limiting ─────────────────────────────────────────────────────────────
+_rate: dict        = defaultdict(list)  # per-IP submission timestamps
+_global_hits: list = []                 # all-IP submission timestamps
+_violations: dict  = defaultdict(int)   # per-IP rate-limit hit count
+_blocked: dict     = {}                 # ip -> unblock timestamp
+
+RATE_LIMIT     = 3      # max submissions per IP per hour
+GLOBAL_LIMIT   = 20     # max submissions across all IPs per hour
+RATE_WINDOW    = 3600   # seconds
+BLOCK_AFTER    = 3      # block IP after this many rate-limit violations
+BLOCK_DURATION = 86400  # 24 hours
+
+# ── Input validation ──────────────────────────────────────────────────────────
+_EMAIL_RE = re.compile(r"^[^@\s]{1,64}@[^@\s]{1,255}\.[^@\s]{2,}$")
+# Strips control characters that enable SMTP header injection
+_CTRL_RE  = re.compile(r"[\r\n\x00-\x08\x0b\x0c\x0e-\x1f\x7f]")
+
+
+def _sanitize(s: str) -> str:
+    return _CTRL_RE.sub("", s)
 
 
 def rate_ok(ip: str) -> bool:
     now = time.time()
+
+    # Check block list
+    if ip in _blocked:
+        if now < _blocked[ip]:
+            return False
+        del _blocked[ip]
+        _violations[ip] = 0
+
+    # Global throttle — limits distributed attacks across many IPs
+    _global_hits[:] = [t for t in _global_hits if now - t < RATE_WINDOW]
+    if len(_global_hits) >= GLOBAL_LIMIT:
+        return False
+
+    # Per-IP throttle — repeated violations escalate to a 24 h block
     _rate[ip] = [t for t in _rate[ip] if now - t < RATE_WINDOW]
     if len(_rate[ip]) >= RATE_LIMIT:
+        _violations[ip] += 1
+        if _violations[ip] >= BLOCK_AFTER:
+            _blocked[ip] = now + BLOCK_DURATION
+            logging.warning("Blocked IP %s for 24 h after %d violations", ip, _violations[ip])
         return False
+
     _rate[ip].append(now)
+    _global_hits.append(now)
     return True
 
 
@@ -59,27 +100,28 @@ def send_email(to: str, subject: str, body_html: str, body_text: str) -> None:
 
 
 def send_confirmation(first: str, last: str, email: str, message: str) -> None:
-    subject = "Your message has been received — Toufic Majdalani"
-    html = f"""
+    ef, el, ee, em = (_html.escape(x) for x in (first, last, email, message))
+    subject   = "Your message has been received — Toufic Majdalani"
+    body_html = f"""
     <html><body style="font-family:'Rubik',Arial,sans-serif;color:#4d4d4d;max-width:600px;margin:auto;padding:24px">
       <h2 style="color:#6f6f6f">Message Received ✓</h2>
-      <p>Hi {first},</p>
+      <p>Hi {ef},</p>
       <p>Thanks for reaching out! I've received your message and will get back to you shortly.</p>
       <hr style="border:none;border-top:1px solid #ddd;margin:24px 0"/>
       <h3 style="color:#6f6f6f">Your submission:</h3>
       <table style="width:100%;border-collapse:collapse">
         <tr><td style="padding:6px 0;color:#999;width:110px">Name</td>
-            <td style="padding:6px 0">{first} {last}</td></tr>
+            <td style="padding:6px 0">{ef} {el}</td></tr>
         <tr><td style="padding:6px 0;color:#999">Email</td>
-            <td style="padding:6px 0">{email}</td></tr>
+            <td style="padding:6px 0">{ee}</td></tr>
         <tr><td style="padding:6px 0;color:#999;vertical-align:top">Message</td>
-            <td style="padding:6px 0;white-space:pre-wrap">{message}</td></tr>
+            <td style="padding:6px 0;white-space:pre-wrap">{em}</td></tr>
       </table>
       <hr style="border:none;border-top:1px solid #ddd;margin:24px 0"/>
       <p style="color:#999;font-size:13px">— Toufic Majdalani · <a href="{SITE_ORIGIN}" style="color:#6f6f6f">{SITE_ORIGIN}</a></p>
     </body></html>
     """
-    text = (
+    body_text = (
         f"Hi {first},\n\n"
         "Thanks for reaching out! I've received your message and will get back to you shortly.\n\n"
         "--- Your submission ---\n"
@@ -89,30 +131,31 @@ def send_confirmation(first: str, last: str, email: str, message: str) -> None:
         "----------------------\n\n"
         f"— Toufic Majdalani · {SITE_ORIGIN}"
     )
-    send_email(email, subject, html, text)
+    send_email(email, subject, body_html, body_text)
 
 
 def send_owner_copy(first: str, last: str, email: str, message: str) -> None:
-    subject = f"[Contact Form] New message from {first} {last}"
-    html = f"""
+    ef, el, ee, em = (_html.escape(x) for x in (first, last, email, message))
+    subject   = f"[Contact Form] New message from {first} {last}"
+    body_html = f"""
     <html><body style="font-family:'Rubik',Arial,sans-serif;color:#4d4d4d;max-width:600px;margin:auto;padding:24px">
       <h2 style="color:#6f6f6f">New Contact Form Submission</h2>
       <table style="width:100%;border-collapse:collapse">
         <tr><td style="padding:6px 0;color:#999;width:110px">Name</td>
-            <td style="padding:6px 0"><strong>{first} {last}</strong></td></tr>
+            <td style="padding:6px 0"><strong>{ef} {el}</strong></td></tr>
         <tr><td style="padding:6px 0;color:#999">Email</td>
-            <td style="padding:6px 0"><a href="mailto:{email}">{email}</a></td></tr>
+            <td style="padding:6px 0"><a href="mailto:{ee}">{ee}</a></td></tr>
         <tr><td style="padding:6px 0;color:#999;vertical-align:top">Message</td>
-            <td style="padding:6px 0;white-space:pre-wrap">{message}</td></tr>
+            <td style="padding:6px 0;white-space:pre-wrap">{em}</td></tr>
       </table>
     </body></html>
     """
-    text = (
+    body_text = (
         f"Name:    {first} {last}\n"
         f"Email:   {email}\n"
         f"Message: {message}\n"
     )
-    send_email(CONTACT_TO, subject, html, text)
+    send_email(CONTACT_TO, subject, body_html, body_text)
 
 
 # ── HTTP handler ──────────────────────────────────────────────────────────────
@@ -149,30 +192,44 @@ class ContactHandler(BaseHTTPRequestHandler):
             return
 
         length = int(self.headers.get("Content-Length", 0))
-        raw    = self.rfile.read(length).decode("utf-8", errors="replace")
-        ct     = self.headers.get("Content-Type", "")
+        if length > MAX_BODY:
+            self._json(413, {"error": "Request too large."}); return
+        raw = self.rfile.read(length).decode("utf-8", errors="replace")
+        ct  = self.headers.get("Content-Type", "")
 
         if "application/json" in ct:
             try:
                 data = json.loads(raw)
             except json.JSONDecodeError:
                 self._json(400, {"error": "Invalid JSON"}); return
-            first   = data.get("first_name", "").strip()
-            last    = data.get("last_name",  "").strip()
-            email   = data.get("email",      "").strip()
-            message = data.get("message",    "").strip()
+            first    = _sanitize(data.get("first_name", "").strip())
+            last     = _sanitize(data.get("last_name",  "").strip())
+            email    = _sanitize(data.get("email",      "").strip())
+            message  = _sanitize(data.get("message",    "").strip())
+            honeypot = data.get("phone", "").strip()
         else:  # form-urlencoded
-            parsed  = parse_qs(raw)
-            first   = parsed.get("first_name", [""])[0].strip()
-            last    = parsed.get("last_name",  [""])[0].strip()
-            email   = parsed.get("email",      [""])[0].strip()
-            message = parsed.get("message",    [""])[0].strip()
+            parsed   = parse_qs(raw)
+            first    = _sanitize(parsed.get("first_name", [""])[0].strip())
+            last     = _sanitize(parsed.get("last_name",  [""])[0].strip())
+            email    = _sanitize(parsed.get("email",      [""])[0].strip())
+            message  = _sanitize(parsed.get("message",    [""])[0].strip())
+            honeypot = parsed.get("phone", [""])[0].strip()
+
+        # Honeypot — bots fill hidden fields, humans don't
+        if honeypot:
+            logging.warning("Honeypot triggered from %s", ip)
+            self._json(200, {"ok": True, "message": "Message sent! Check your inbox for a confirmation."})
+            return
 
         # Validation
         if not all([first, last, email, message]):
             self._json(400, {"error": "All fields are required."}); return
-        if "@" not in email or "." not in email.split("@")[-1]:
+        if len(first) > 40 or len(last) > 40:
+            self._json(400, {"error": "Name too long."}); return
+        if not _EMAIL_RE.match(email):
             self._json(400, {"error": "Invalid email address."}); return
+        if len(message) < 5 or " " not in message:
+            self._json(400, {"error": "Please enter a real message."}); return
         if len(message) > 5000:
             self._json(400, {"error": "Message too long (max 5000 chars)."}); return
 

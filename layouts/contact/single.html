@@ -55,6 +55,13 @@
                       placeholder="What's on your mind?" required></textarea>
           </div>
 
+          <!-- honeypot: hidden from humans, bots fill it -->
+          <div class="hp-field" aria-hidden="true">
+            <label for="phone">Phone</label>
+            <input type="text" id="phone" name="phone"
+                   tabindex="-1" autocomplete="off" />
+          </div>
+
           <button type="submit" id="submit-btn" class="button contact-submit">
             Send Message <i class="fas fa-paper-plane"></i>
           </button>
@@ -156,6 +163,13 @@ textarea.contact-input {
   border: 1px solid #f5c6c6;
   color: #7b2020;
 }
+.hp-field {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
 </style>
 
 <script>
@@ -178,6 +192,7 @@ textarea.contact-input {
     var last    = document.getElementById('last_name').value.trim();
     var email   = document.getElementById('email').value.trim();
     var message = document.getElementById('message').value.trim();
+    var phone   = document.getElementById('phone').value;
 
     if (!first || !last || !email || !message) {
       showAlert('Please fill in all fields.', 'error');
@@ -194,7 +209,8 @@ textarea.contact-input {
         first_name: first,
         last_name:  last,
         email:      email,
-        message:    message
+        message:    message,
+        phone:      phone
       })
     })
     .then(function (res) { return res.json(); })
