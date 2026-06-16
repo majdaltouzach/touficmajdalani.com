@@ -17,7 +17,7 @@
         "
       >
         <div class="text-holder">
-          <h1>{{ .title | safeHTML }}</h1>
+          <h2>{{ .title | safeHTML }}</h2>
           <p>{{ .content | markdownify | emojify }}</p>
           {{ if .button.enable }} {{ with .button }}
           <a
@@ -33,7 +33,7 @@
       </div>
       {{ with .image }}
       <div class="col-lg-6 col-sm-6 col-9 about-me-images">
-        <img src="{{ . | relURL }}" alt="about-me" />
+        <img src="{{ . | relURL }}" alt="Toufic Majdalani - Security Software Engineer and Linux Developer" />
       </div>
       {{ end }}
     </div>

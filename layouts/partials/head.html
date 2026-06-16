@@ -12,6 +12,56 @@
     <meta name="author" content="{{ . }}" />
   {{ end }}
 
+  {{ "<!-- canonical -->" | safeHTML }}
+  <link rel="canonical" href="{{ .Permalink }}" />
+
+  {{ "<!-- open graph -->" | safeHTML }}
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="{{ .Permalink }}" />
+  <meta property="og:title" content="{{ .Title }}" />
+  <meta property="og:description" content="{{ with .Site.Params.description }}{{ . }}{{ end }}" />
+  <meta property="og:site_name" content="{{ .Site.Title }}" />
+
+  {{ "<!-- twitter card -->" | safeHTML }}
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="{{ .Title }}" />
+  <meta name="twitter:description" content="{{ with .Site.Params.description }}{{ . }}{{ end }}" />
+
+  {{ "<!-- person schema -->" | safeHTML }}
+  {{ if .IsHome }}
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "Toufic Majdalani",
+    "url": "{{ .Site.BaseURL }}",
+    "jobTitle": "Security Software Engineer",
+    "description": "{{ .Site.Params.description }}",
+    "alumniOf": {
+      "@type": "CollegeOrUniversity",
+      "name": "Washington State University"
+    },
+    "hasCredential": {
+      "@type": "EducationalOccupationalCredential",
+      "name": "CompTIA Security+"
+    },
+    "knowsAbout": [
+      "C/C++ Systems Programming",
+      "Linux Kernel Development",
+      "Cybersecurity",
+      "Malware Analysis",
+      "Binary Analysis",
+      "Python",
+      "Machine Learning"
+    ],
+    "sameAs": [
+      "https://github.com/majdaltouzach",
+      "https://www.linkedin.com/in/majdaltoufic"
+    ]
+  }
+  </script>
+  {{ end }}
+
   {{ "<!-- plugins -->" | safeHTML }}
   {{ range .Site.Params.plugins.css }}
     <link rel="stylesheet" href="{{ .link | relURL }}" />

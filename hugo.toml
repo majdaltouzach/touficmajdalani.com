@@ -1,6 +1,6 @@
 ######################## default configuration ####################
 baseURL = "https://touficmajdalani.com"
-title = "Toufic Majdalani's Website"
+title = "Toufic Majdalani | Security Software Engineer & Linux Developer"
 theme = "port-hugo"
 
 ############################# Plugins ##############################
@@ -58,8 +58,8 @@ weight = 4
 [params]
 copyright = "Copyright Toufic Majdalani &copy;"
 # Meta data
-description = "Personal Portfolio"
-author = "Jack Davis"
+description = "Portfolio of Toufic Majdalani, a Security Software Engineer and Cybersecurity Professional specializing in C/C++ systems, Linux kernel development, and threat analysis."
+author = "Toufic Majdalani"
 favicon = "images/favicon.png"
 google_analytics = "G-ABCDEFG123"
 logo_light = "images/logo.svg"
@@ -67,7 +67,7 @@ logo_dark = "images/logo-dark.svg"
 
 # Preloader
 [params.preloader]
-enable = true
+enable = false
 preloader = "images/preloader.gif" # use jpg, png, svg or gif format.
 
 ############################# social site ########################
@@ -75,14 +75,17 @@ preloader = "images/preloader.gif" # use jpg, png, svg or gif format.
 [[params.social]]
 icon = "fab fa-github"
 link = "https://github.com/majdaltouzach"
+alt = "View Toufic Majdalani on GitHub"
 
 [[params.social]]
 icon = "fab fa-linkedin"
 link = "https://www.linkedin.com/in/majdaltoufic"
+alt = "Connect with Toufic Majdalani on LinkedIn"
 
 [[params.social]]
 icon = "fas fa-envelope"
 link = "mailto:toufic@touficmajdalani.com"
+alt = "Email Toufic Majdalani"
 
 [[params.social]]
 # icon = "fab fa-medium"

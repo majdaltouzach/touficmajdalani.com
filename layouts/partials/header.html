@@ -13,12 +13,14 @@
     <img
       class="d-none d-md-block"
       src="{{ .bg_image | relURL }}"
-      alt="background"
+      alt=""
+      role="presentation"
     /><img
       class="d-md-none"
       src="{{ .mobile_bg_image | relURL }}"
-      alt="background"
-    />{{ else }} <img src="{{ .bg_image | relURL }}" alt="background" />{{ end
+      alt=""
+      role="presentation"
+    />{{ else }} <img src="{{ .bg_image | relURL }}" alt="" role="presentation" />{{ end
     }}
   </div>
   <div class="container">
