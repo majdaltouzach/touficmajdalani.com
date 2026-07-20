@@ -7,6 +7,7 @@ Sends confirmation email to user + copy to site owner via ProtonMail SMTP
 
 import json
 import logging
+import math
 import os
 import smtplib
 import time
@@ -38,6 +39,40 @@ def rate_ok(ip: str) -> bool:
     if len(_rate[ip]) >= RATE_LIMIT:
         return False
     _rate[ip].append(now)
+    return True
+
+
+def name_ok(name: str) -> bool:
+    if not 1 <= len(name) <= 40:
+        return False
+    # Unicode letters + allowed punctuation only (no digits, underscores)
+    if not all(c.isalpha() or c in " '-." for c in name):
+        return False
+    # Random-letter bot names (e.g. "esLPfyaZEjUcWthDkScWhvJ") have high entropy
+    if len(name) >= 8 and _entropy(name) > 4.0:
+        return False
+    return True
+
+
+def _entropy(s: str) -> float:
+    if not s:
+        return 0.0
+    freq = {}
+    for c in s:
+        freq[c] = freq.get(c, 0) + 1
+    n = len(s)
+    return -sum((f / n) * math.log2(f / n) for f in freq.values())
+
+
+def message_ok(msg: str) -> bool:
+    if len(msg) < 20:
+        return False
+    if " " not in msg:
+        return False
+    # High-entropy short messages are likely random strings.
+    # Real prose rarely exceeds ~4.5 bits/char for short messages.
+    if len(msg) < 80 and _entropy(msg) > 4.5:
+        return False
     return True
 
 
@@ -161,18 +196,29 @@ class ContactHandler(BaseHTTPRequestHandler):
             last    = data.get("last_name",  "").strip()
             email   = data.get("email",      "").strip()
             message = data.get("message",    "").strip()
+            pot     = data.get("website",    "").strip()
         else:  # form-urlencoded
             parsed  = parse_qs(raw)
             first   = parsed.get("first_name", [""])[0].strip()
             last    = parsed.get("last_name",  [""])[0].strip()
             email   = parsed.get("email",      [""])[0].strip()
             message = parsed.get("message",    [""])[0].strip()
+            pot     = parsed.get("website",    [""])[0].strip()
+
+        # Honeypot — silently accept so bots don't know they were blocked
+        if pot:
+            self._json(200, {"ok": True, "message": "Message sent! Check your inbox for a confirmation."})
+            return
 
         # Validation
         if not all([first, last, email, message]):
             self._json(400, {"error": "All fields are required."}); return
+        if not name_ok(first) or not name_ok(last):
+            self._json(400, {"error": "Invalid name."}); return
         if "@" not in email or "." not in email.split("@")[-1]:
             self._json(400, {"error": "Invalid email address."}); return
+        if not message_ok(message):
+            self._json(400, {"error": "Message must be at least 20 characters and contain real text."}); return
         if len(message) > 5000:
             self._json(400, {"error": "Message too long (max 5000 chars)."}); return
 
